@@ -1,0 +1,213 @@
+docker images
+docker pull cassandra
+docker images
+docker run -p 7000:7000 -p 7001:7001 -p 7199:7199 -p 9042:9042 -p 9160:9160 --name cassandra -d cassandra:latest
+docker images
+docker ps
+docker exec -it 90570593d9fa bash
+ cqlsh
+
+DROP KEYSPACE IF EXISTS bibliotheque;
+
+
+Étape 1: Créer un keyspace
+
+CREATE KEYSPACE bibliotheque
+WITH REPLICATION = {
+    'class': 'SimpleStrategy',
+    'replication_factor': 1
+};
+
+-- Utiliser le keyspace 'bibliotheque'
+USE bibliotheque;
+
+Étape 1 : Créer les tables
+Table des livres
+
+CREATE TABLE bibliotheque.livres (
+    id INT PRIMARY KEY,
+    titre TEXT,
+    auteur TEXT,
+    isbn TEXT,
+    genre TEXT
+);
+Table des emprunteurs
+
+CREATE TABLE bibliotheque.emprunteurs (
+    id INT PRIMARY KEY,
+    nom TEXT,
+    adresse TEXT,
+    email TEXT
+);
+Table des emprunts
+
+CREATE TABLE bibliotheque.emprunts (
+    id INT PRIMARY KEY,
+    livre_id INT,
+    emprunteur_id INT,
+    date_emprunt Date,
+    date_retour Date
+);
+
+Étape 2 : Insérer des données
+Vous devrez générer manuellement les clés primaires dans votre application avant d'insérer les données dans Cassandra. Voici un exemple de script pour insérer des données avec des clés primaires allant de 1 à 100.
+
+--Ajouter des livres
+
+INSERT INTO bibliotheque.livres (id, titre, auteur, isbn, genre)
+VALUES (1, 'Le Seigneur des Anneaux', 'J.R.R. Tolkien', '978-2-07-036281-7', 'Fantasy');
+
+INSERT INTO bibliotheque.livres (id, titre, auteur, isbn, genre)
+VALUES (2, 'Le Petit Prince', 'Antoine de Saint-Exupéry', '978-2-07-056734-3', 'Conte');
+
+--Ajouter des emprunteurs
+
+INSERT INTO bibliotheque.emprunteurs (id, nom, adresse, email)
+VALUES (1, 'Jean Dupont', '1 Rue de la Poste, 75000 Paris', 'jeandupont@example.com');
+
+INSERT INTO bibliotheque.emprunteurs (id, nom, adresse, email)
+VALUES (2, 'Marie Curie', '2 Rue de la Science, 75000 Paris', 'mariecurie@example.com');
+
+--Enregistrer des emprunts
+
+INSERT INTO bibliotheque.emprunts (id, livre_id, emprunteur_id, date_emprunt)
+VALUES (1, 1, 1, toTimestamp(now()));
+
+INSERT INTO bibliotheque.emprunts (id, livre_id, emprunteur_id, date_emprunt)
+VALUES (2, 2, 2, toTimestamp(now()));
+
+--Obtenir les informations d'un livre
+
+SELECT * FROM bibliotheque.livres WHERE id = <UUID_LIVRE_1>;
+
+--Lister tous les livres
+
+SELECT * FROM bibliotheque.livres;
+
+--Obtenir les informations d'un emprunteur
+
+SELECT * FROM bibliotheque.emprunteurs WHERE id = <UUID_EMPRUNTEUR_1>;
+
+--Lister les emprunts d'un emprunteur
+
+SELECT * FROM bibliotheque.emprunts WHERE emprunteur_id = <UUID_EMPRUNTEUR_1>;
+
+Étape 5: Mettre à jour les données
+--Mettre à jour le titre d'un livre
+
+UPDATE bibliotheque.livres SET titre = 'Le Hobbit' WHERE id = <UUID_LIVRE_1>;
+
+--Mettre à jour l'adresse d'un emprunteur
+
+UPDATE bibliotheque.emprunteurs SET adresse = '2 Rue du Commerce, 75000 Paris' WHERE id = <UUID_EMPRUNTEUR_1>;
+
+Enregister le retour d'un livre
+
+UPDATE bibliotheque.emprunts SET date_retour = '2024-05-21' WHERE id = <UUID_EMPRUNT_1>;
+
+Étape 6: Supprimer des données
+--Supprimer un livre
+
+DELETE FROM bibliotheque.livres WHERE id = <UUID_LIVRE_1>;
+--Supprimer un emprunteur
+
+DELETE FROM bibliotheque.emprunteurs WHERE id = <UUID_EMPRUNTEUR_1>;
+
+--Supprimer un emprunt
+
+DELETE FROM bibliotheque.emprunts WHERE id = <UUID_EMPRUNT_1>;
+
+******Étape 7: Requêtes avancées
+Rechercher des livres par titre
+
+SELECT * FROM bibliotheque.livres WHERE titre LIKE '%Seigneur%';
+Obtenir le nombre de livres par genre 
+
+SELECT genre, COUNT(*) AS nb_livres
+FROM bibliotheque.livres
+GROUP BY genre;
+Lister les livres empruntés par un emprunteur avec le titre du livre
+
+SELECT l.titre, e.nom
+FROM bibliotheque.emprunts em
+JOIN bibliotheque.livres l ON em.livre_id = l.id
+JOIN bibliotheque.emprunteurs e ON em.emprunteur_id = e.id
+WHERE em.emprunteur_id = <UUID_EMPRUNTEUR_1>;
+************
+
+Catégories et sous-catégories
+--Création de la table categories
+
+CREATE TABLE bibliotheque.categories (
+    id UUID PRIMARY KEY,
+    nom TEXT
+);
+Ajout d'une colonne categorie_id à la table livres
+
+ALTER TABLE bibliotheque.livres
+ADD categorie_id UUID;
+Exemple d'ajout d'un livre avec une catégorie
+
+INSERT INTO bibliotheque.categories (id, nom) 
+VALUES (uuid(), 'Fiction');
+
+INSERT INTO bibliotheque.livres (id, titre, auteur, isbn, genre, categorie_id)
+VALUES (uuid(), 'Le Petit Prince', 'Antoine de Saint-Exupéry', '978-2-07-056734-3', 'Conte',idcategory)
+
+Gestion des utilisateurs et des permissions
+--Création de la table utilisateurs
+
+CREATE TABLE bibliotheque.utilisateurs (
+    id UUID PRIMARY KEY,
+    nom TEXT,
+    email TEXT,
+    mot_de_passe TEXT,
+    role TEXT
+);
+Exemple d'ajout d'un utilisateur avec un rôle
+
+INSERT INTO bibliotheque.utilisateurs (id, nom, email, mot_de_passe, role)
+VALUES (uuid(), 'Jean Dupont', 'jeandupont@example.com', 'password123', 'bibliothécaire');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
